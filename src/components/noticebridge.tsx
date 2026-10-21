@@ -566,7 +566,7 @@ export default function NoticeBridge() {
                         ? `${workspace.profile.name.toUpperCase()}’S`
                         : "THE SCHOOL"}
                     <br />
-                    <span>{hi ? "नोटिसबोर्ड।" : "NOTICEBOARD."}</span>
+                    <span>{hi ? "नोटिसबोर्ड" : "NOTICEBOARD"}</span>
                   </>
                 )}
               </h1>

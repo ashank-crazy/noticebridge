@@ -3050,3 +3050,12 @@ input[type="checkbox"] {
     letter-spacing: -1.5px;
   }
 }
+
+@media (min-width: 621px) and (max-width: 780px) {
+  .welcome h1 {
+    font-size: clamp(62px, 10.2vw, 80px);
+  }
+  .welcome h1 > span {
+    white-space: nowrap;
+  }
+}
