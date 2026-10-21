@@ -39,7 +39,7 @@ import ImportDialog from "./import-dialog";
 import SourcePanel from "./source-panel";
 import CalendarView from "./calendar-view";
 import Modal from "./modal";
-import { analyzeLocal, compareRevision, formatDate } from "@/lib/engine";
+import { analyzeLocal, compareRevision, formatDate, formatDeadline } from "@/lib/engine";
 import { createCalendar } from "@/lib/calendar";
 import { sampleDocument } from "@/lib/sample";
 import {
@@ -939,9 +939,7 @@ export default function NoticeBridge() {
                                 }}
                               >
                                 <CalendarDays size={14} />
-                                {action.dueDate
-                                  ? `${action.kind === "bring" || action.kind === "attend" ? (hi ? "को" : "On") : hi ? "तक" : "By"} ${formatDate(action.dueDate, workspace.language)}`
-                                  : action.dueLabel || (hi ? "तारीख़ नहीं दी गई" : "No date given")}
+                                {formatDeadline(action, workspace.language)}
                                 {action.reviewed && <Check size={12} />}
                               </button>
                               <button

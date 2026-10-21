@@ -6,6 +6,8 @@ NoticeBridge is a family workspace for school circulars. Upload a PDF or screens
 
 Built for NextSpark Hacks 2026. The school and circulars in the demo are fictional.
 
+![NoticeBridge workspace with next steps and highlighted source evidence](docs/noticebridge-desktop.png)
+
 ## Run locally
 
 Use Node.js 22 or newer (Node 24 recommended).
@@ -53,6 +55,7 @@ AI errors remain visible and offer local extraction as an explicit alternative. 
 - Text PDFs, English image OCR, scanned-PDF OCR, and pasted or `.txt` text.
 - PDF.js parsing and Tesseract.js recognition in the browser; files are limited to 10 MB and PDFs to eight pages.
 - Checklists, completion state, individual date review, and saved notices in browser local storage.
+- Notice removal from this device and a restartable sample demo.
 - Revision matching for additions, changes, and removals, with the immediately previous source retained.
 - Month calendar and RFC 5545 calendar-file export, restricted to unfinished steps with confirmed dates.
 - All-day reminders with an alert one day before; UTF-8-safe line folding and calendar text escaping.
@@ -96,3 +99,7 @@ src/lib/engine.test.ts   Regression tests for important data behavior
 - OpenAI Codex assisted with ideation, implementation, design, documentation, and testing. The participant should review the code, understand the extraction and revision behavior, and describe their own contributions accurately in the hackathon submission.
 
 The bridge mark and interface illustration are original SVG/CSS graphics. No private school documents or third-party school identities are included in the demo.
+
+## Validation
+
+The latest local checks passed: **39 tests**, a TypeScript-checked production build, and browser checks for pasted text, text PDF extraction, English screenshot OCR, date review, revision comparison, Hindi sample text, persistence after reload, local notice removal, and calendar-file download. Desktop (1280 px) and mobile (390 px) layouts were inspected. See [the verification notes](docs/VERIFICATION.md) for test boundaries.

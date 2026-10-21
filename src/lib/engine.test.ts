@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyzeLocal, compareRevision, extractDate } from "./engine";
+import { analyzeLocal, compareRevision, extractDate, formatDate, formatDeadline } from "./engine";
 import { sampleDocument } from "./sample";
 import { createCalendar, foldCalendarLine } from "./calendar";
 
@@ -76,6 +76,21 @@ describe("source-grounded extraction", () => {
 });
 
 describe("date uncertainty", () => {
+  it("uses natural Hindi word order for reminder dates", () => {
+    const notice = analyzeLocal(sampleDocument());
+    expect(formatDeadline(notice.actions[0], "hi")).toMatch(/ तक$/);
+    expect(formatDeadline(notice.actions[2], "hi")).toMatch(/ को$/);
+  });
+  it("formats calendar dates independently of the viewer’s timezone", () => {
+    const timezone = process.env.TZ;
+    try {
+      process.env.TZ = "Pacific/Kiritimati";
+      expect(formatDate("2026-10-24")).toBe("24 Oct");
+    } finally {
+      if (timezone === undefined) delete process.env.TZ;
+      else process.env.TZ = timezone;
+    }
+  });
   it.each([
     ["by 24 October 2026", "2026-10-24"],
     ["on October 24, 2026", "2026-10-24"],

@@ -25,16 +25,14 @@ const fixture = {
 
 function provider(output: unknown = fixture, status = "completed") {
   vi.stubEnv("OPENAI_API_KEY", "test-key-never-a-real-secret");
-  const fetchMock = vi
-    .fn()
-    .mockResolvedValue(
-      Response.json({
-        status,
-        output: [
-          { type: "message", content: [{ type: "output_text", text: JSON.stringify(output) }] },
-        ],
-      }),
-    );
+  const fetchMock = vi.fn().mockResolvedValue(
+    Response.json({
+      status,
+      output: [
+        { type: "message", content: [{ type: "output_text", text: JSON.stringify(output) }] },
+      ],
+    }),
+  );
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
 }

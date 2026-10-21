@@ -327,8 +327,16 @@ export function formatDate(
   options?: Intl.DateTimeFormatOptions,
 ): string {
   if (!iso) return language === "hi" ? "तारीख़ नहीं दी गई" : "No date given";
-  return new Intl.DateTimeFormat(
-    language === "hi" ? "hi-IN" : "en-GB",
-    { timeZone: "UTC", ...(options ?? { day: "numeric", month: "short" }) },
-  ).format(new Date(`${iso}T12:00:00Z`));
+  return new Intl.DateTimeFormat(language === "hi" ? "hi-IN" : "en-GB", {
+    timeZone: "UTC",
+    ...(options ?? { day: "numeric", month: "short" }),
+  }).format(new Date(`${iso}T12:00:00Z`));
+}
+
+export function formatDeadline(action: ActionItem, language = "en"): string {
+  if (!action.dueDate)
+    return action.dueLabel || (language === "hi" ? "तारीख़ नहीं दी गई" : "No date given");
+  const date = formatDate(action.dueDate, language);
+  const on = action.kind === "bring" || action.kind === "attend";
+  return language === "hi" ? `${date} ${on ? "को" : "तक"}` : `${on ? "On" : "By"} ${date}`;
 }
