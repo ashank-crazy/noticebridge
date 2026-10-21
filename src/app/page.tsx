@@ -1,3 +1,5 @@
 import NoticeBridge from "@/components/noticebridge";
 
-export default function Home() { return <NoticeBridge />; }
+export default function Home() {
+  return <NoticeBridge />;
+}

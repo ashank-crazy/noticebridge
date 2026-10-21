@@ -1,9 +1,12 @@
 import { z } from "zod";
 
-export const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((s) => {
-  const date = new Date(`${s}T12:00:00Z`);
-  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === s;
-}, "Invalid calendar date");
+export const isoDate = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/)
+  .refine((s) => {
+    const date = new Date(`${s}T12:00:00Z`);
+    return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === s;
+  }, "Invalid calendar date");
 
 export const documentSchema = z.object({
   id: z.string().min(1).max(100),
@@ -19,7 +22,11 @@ export const actionSchema = z.object({
   kind: z.enum(["submit", "pay", "bring", "attend", "confirm", "other"]),
   summary: z.string(),
   summaryHi: z.string().nullable(),
-  evidence: z.object({ quote: z.string(), start: z.number().int().nonnegative(), end: z.number().int().nonnegative() }),
+  evidence: z.object({
+    quote: z.string(),
+    start: z.number().int().nonnegative(),
+    end: z.number().int().nonnegative(),
+  }),
   dueDate: isoDate.nullable(),
   dueLabel: z.string().nullable(),
   dateIssue: z.string().nullable(),
@@ -27,7 +34,9 @@ export const actionSchema = z.object({
   reviewed: z.boolean(),
   obligation: z.enum(["required", "optional"]),
   change: z.enum(["added", "updated", "unchanged"]).nullable(),
-  previous: z.object({ summary: z.string(), dueDate: isoDate.nullable(), dueLabel: z.string().nullable() }).optional(),
+  previous: z
+    .object({ summary: z.string(), dueDate: isoDate.nullable(), dueLabel: z.string().nullable() })
+    .optional(),
 });
 
 export const analysisSchema = z.object({
@@ -41,12 +50,14 @@ export const analysisSchema = z.object({
   mode: z.enum(["local", "ai"]),
   warning: z.string().optional(),
   version: z.number().int().positive(),
-  revision: z.object({
-    previousTitle: z.string(),
-    previousDocument: documentSchema,
-    removed: z.array(actionSchema),
-    changedCount: z.number(),
-  }).optional(),
+  revision: z
+    .object({
+      previousTitle: z.string(),
+      previousDocument: documentSchema,
+      removed: z.array(actionSchema),
+      changedCount: z.number(),
+    })
+    .optional(),
 });
 
 export const workspaceSchema = z.object({

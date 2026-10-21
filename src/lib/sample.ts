@@ -24,12 +24,20 @@ For questions, contact your class teacher.
 Warm regards,
 The Greenwood School Team`;
 
-export const REVISION_TEXT = SAMPLE_TEXT
-  .replace("Circular No. 042 • Issued: 21 October 2026", "Circular No. 042 (Revised) • Issued: 22 October 2026")
+export const REVISION_TEXT = SAMPLE_TEXT.replace(
+  "Circular No. 042 • Issued: 21 October 2026",
+  "Circular No. 042 (Revised) • Issued: 22 October 2026",
+)
   .replace("SCIENCE MUSEUM VISIT", "SCIENCE MUSEUM VISIT — UPDATED")
   .replace("by 24 October 2026", "by 27 October 2026")
-  .replace("a packed lunch and a water bottle", "a packed lunch, a water bottle, and a school ID card")
-  .replace("Dear parents,", "Dear parents,\n\nThis revised circular replaces the notice issued on 21 October 2026. The consent deadline has been extended and the packing list updated.");
+  .replace(
+    "a packed lunch and a water bottle",
+    "a packed lunch, a water bottle, and a school ID card",
+  )
+  .replace(
+    "Dear parents,",
+    "Dear parents,\n\nThis revised circular replaces the notice issued on 21 October 2026. The consent deadline has been extended and the packing list updated.",
+  );
 
 export function sampleDocument(revised = false): SourceDocument {
   return {
