@@ -35,7 +35,7 @@ Choose AI processing when importing a notice to enable richer extraction and Hin
 
 ## Demo
 
-Open the museum-trip notice, select **See source**, and confirm a deadline. Then try the sample revision: the consent deadline moves from 24 to 27 October, and a school ID card is added to the packing list.
+Open the museum-trip notice, select **See source**, and confirm a deadline. Choose **Load revised circular**: the consent deadline moves from 24 to 27 October, and a school ID card is added to the packing list.
 
 ## Development
 

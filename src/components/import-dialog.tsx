@@ -128,10 +128,10 @@ export default function ImportDialog({
         revision
           ? hi
             ? "सूचना का नया संस्करण जोड़ें"
-            : "A new version of this notice"
+            : "Compare the new circular."
           : hi
             ? "नई सूचना जोड़ें"
-            : "Let’s make this notice simple"
+            : "Pin a notice."
       }
       onClose={onClose}
       wide
@@ -139,8 +139,8 @@ export default function ImportDialog({
     >
       <p className="modal-intro">
         {revision
-          ? "We’ll compare the instructions, show what changed, and keep your previous version for reference."
-          : "A school circular, a screenshot, a note from class. Bring it here and find your next steps."}
+          ? "Upload the revised circular. We’ll compare it with the version on your board."
+          : "Upload a school circular, or paste the message from your class group."}
       </p>
       <form onSubmit={submit}>
         <div className="segmented import-tabs" role="group" aria-label="Import method">
@@ -282,8 +282,7 @@ export default function ImportDialog({
                 <Sparkles size={15} /> Use AI extraction & Hindi translation
               </strong>
               <p>
-                Send this notice’s text to OpenAI for richer instructions and translation. Your API
-                key stays on the server.
+                Send the extracted notice text to OpenAI for instructions and Hindi translation.
               </p>
             </div>
           </label>
@@ -291,9 +290,8 @@ export default function ImportDialog({
           <div className="local-explainer">
             <LockKeyhole size={16} />
             <p>
-              <strong>Local mode, ready to use.</strong> Basic English extraction runs in your
-              browser. The sample includes Hindi translations; full translation for your own notices
-              needs the optional AI connection.
+              <strong>English extraction on this device.</strong> The sample includes Hindi text.
+              Translation of your own notices needs the AI option.
             </p>
           </div>
         )}
@@ -327,7 +325,7 @@ export default function ImportDialog({
         <div className="modal-footer">
           {!revision && (
             <button type="button" className="text-button" disabled={busy} onClick={onSample}>
-              {hi ? "उदाहरण देखें" : "Just exploring? Try a sample"}
+              {hi ? "उदाहरण देखें" : "Use the sample circular"}
             </button>
           )}
           <button

@@ -37,7 +37,7 @@ export default function SourcePanel({
       <div className="source-heading">
         <div className="source-title">
           <FileText size={18} />
-          <h2>{hi ? "मूल शब्द" : "The original wording"}</h2>
+          <h2>{hi ? "मूल सूचना" : "The circular"}</h2>
         </div>
         <button
           className={`icon-button ${speaking ? "is-active" : ""}`}

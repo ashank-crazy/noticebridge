@@ -9,7 +9,7 @@ For students of Classes 6–8 and their parents
 
 Dear parents,
 
-Our students will visit the National Science Museum on 30 October 2026. It is a day to get curious, explore, and learn together.
+Our students will visit the National Science Museum on 30 October 2026.
 
 Please submit the signed consent form to your class teacher by 24 October 2026.
 

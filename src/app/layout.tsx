@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "NoticeBridge — A little clarity for every family",
+  title: "NoticeBridge — The school noticeboard",
   description:
-    "Turn school notices into clear next steps. Check the source, understand revisions, and keep important dates together—in English or Hindi.",
+    "Consent forms, trip fees, changed deadlines. Keep the school circular, its instructions, and your dates on one noticeboard.",
   applicationName: "NoticeBridge",
 };
 

@@ -6,65 +6,43 @@ import {
   ArrowRight,
   ArrowUpRight,
   Bell,
-  BookOpen,
   CalendarDays,
   Check,
-  CheckCheck,
-  ChevronDown,
-  ChevronRight,
   CircleHelp,
   ClipboardList,
-  FileCheck2,
   FileText,
   GitCompareArrows,
-  Heart,
   Headphones,
   Languages,
-  Leaf,
   Menu,
+  Paperclip,
+  PencilLine,
   Plus,
-  ShieldCheck,
-  Sparkles,
-  Users,
-  VolumeX,
-  Wallet,
-  X,
-  Backpack,
-  MapPin,
-  AlertCircle,
+  Search,
   Trash2,
+  VolumeX,
+  X,
+  AlertCircle,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import ImportDialog from "./import-dialog";
 import SourcePanel from "./source-panel";
 import CalendarView from "./calendar-view";
+import ActionCard from "./action-card";
+import ProfileDialog from "./profile-dialog";
 import Modal from "./modal";
-import { analyzeLocal, compareRevision, formatDate, formatDeadline } from "@/lib/engine";
+import { analyzeLocal, compareRevision, formatDate } from "@/lib/engine";
 import { createCalendar } from "@/lib/calendar";
 import { sampleDocument } from "@/lib/sample";
-import {
-  isoDate,
-  workspaceSchema,
-  type ActionItem,
-  type NoticeAnalysis,
-  type Workspace,
-} from "@/lib/types";
+import { workspaceSchema, type ActionItem, type NoticeAnalysis, type Workspace } from "@/lib/types";
 
 const STORAGE_KEY = "noticebridge.workspace.v1";
-const ICONS: Record<ActionItem["kind"], LucideIcon> = {
-  submit: FileCheck2,
-  pay: Wallet,
-  bring: Backpack,
-  attend: MapPin,
-  confirm: CheckCheck,
-  other: ClipboardList,
-};
 const initialNotice = analyzeLocal(sampleDocument());
 const initial: Workspace = {
   version: 1,
   notices: [initialNotice],
   activeId: initialNotice.id,
   language: "en",
+  profile: { name: "", school: "", className: "" },
 };
 
 function BrandMark() {
@@ -82,66 +60,14 @@ function BrandMark() {
   );
 }
 
-function DateReview({
-  action,
-  onConfirm,
-  onClose,
-}: {
-  action: ActionItem;
-  onConfirm: (date: string) => void;
-  onClose: () => void;
-}) {
-  const [date, setDate] = useState(action.dueDate ?? "");
-  return (
-    <form
-      className="date-review"
-      onSubmit={(event) => {
-        event.preventDefault();
-        if (isoDate.safeParse(date).success) onConfirm(date);
-      }}
-    >
-      <label htmlFor={`date-${action.id}`}>
-        <strong>Check the date against the source</strong>
-        <span>
-          {action.dateIssue ??
-            "Confirm the calendar date below. Reminders are all-day; check the notice for exact times."}
-        </span>
-      </label>
-      <div>
-        <input
-          id={`date-${action.id}`}
-          type="date"
-          required
-          value={date}
-          onChange={(event) => setDate(event.target.value)}
-          aria-label="Confirm reminder date"
-        />
-        <button
-          type="submit"
-          className="button primary small"
-          disabled={!isoDate.safeParse(date).success}
-        >
-          <Check size={14} /> Confirm
-        </button>
-        <button
-          type="button"
-          className="icon-button"
-          onClick={onClose}
-          aria-label="Cancel date review"
-        >
-          <X size={16} />
-        </button>
-      </div>
-    </form>
-  );
-}
-
 export default function NoticeBridge() {
   const [workspace, setWorkspace] = useState<Workspace>(initial);
   const [hydrated, setHydrated] = useState(false);
   const [view, setView] = useState<"notices" | "calendar">("notices");
   const [importMode, setImportMode] = useState<"new" | "revision" | null>(null);
   const [help, setHelp] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [noticeQuery, setNoticeQuery] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [aiAvailable, setAiAvailable] = useState(false);
   const [filter, setFilter] = useState<"todo" | "done">("todo");
@@ -288,7 +214,7 @@ export default function NoticeBridge() {
       setWorkspace((w) => ({ ...w, notices: [...w.notices, incoming], activeId: incoming.id }));
       setToast(
         incoming.actions.length
-          ? `${incoming.actions.length} next step${incoming.actions.length === 1 ? "" : "s"} found. You’re ready to review them.`
+          ? `${incoming.actions.length} next step${incoming.actions.length === 1 ? "" : "s"} found. Check the dates below.`
           : "Notice added. No clear action instructions were found; read the source text.",
       );
     }
@@ -326,7 +252,7 @@ export default function NoticeBridge() {
     setSourcePrevious(false);
     setEditingDate(null);
     setSelectedActionId(compared.actions[0]?.id ?? null);
-    setToast("Two changes caught: the consent deadline and the packing list. Have a look below.");
+    setToast("Consent deadline and packing list updated. Check the revised circular.");
   }
 
   function exportCalendar() {
@@ -400,6 +326,20 @@ export default function NoticeBridge() {
     );
   }
 
+  const visibleNotices = workspace.notices.filter((item) =>
+    `${item.title} ${item.document.name}`.toLowerCase().includes(noticeQuery.toLowerCase()),
+  );
+  const pinned = workspace.notices
+    .flatMap((item) =>
+      item.actions
+        .filter((action) => action.dueDate && !action.completed && !action.dateIssue)
+        .map((action) => ({ notice: item, action })),
+    )
+    .sort((a, b) => a.action.dueDate!.localeCompare(b.action.dueDate!))[0];
+  const schoolContext = [workspace.profile.school, workspace.profile.className]
+    .filter(Boolean)
+    .join(" / ");
+
   return (
     <div
       className="app-shell"
@@ -408,125 +348,166 @@ export default function NoticeBridge() {
       }}
     >
       <a className="skip-link" href="#main-content">
-        Skip to your notices
+        Skip to your noticeboard
       </a>
-      {sidebarOpen && (
-        <button
-          className="sidebar-scrim"
-          aria-label="Close navigation"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-      <aside
-        className={`sidebar ${sidebarOpen ? "open" : ""}`}
-        inert={isMobile && !sidebarOpen}
-        aria-label="Workspace navigation"
-      >
+      <header className="topbar">
         <button
           className="brand"
+          aria-label="NoticeBridge home"
           onClick={() => {
             setView("notices");
             setSidebarOpen(false);
           }}
-          aria-label="NoticeBridge home"
         >
           <BrandMark />
           <span>
-            notice<span>bridge</span>
-            <small>A LITTLE CLARITY, EVERY DAY</small>
+            NoticeBridge<small>SCHOOL → HOME</small>
           </span>
         </button>
-        <button
-          className="button primary new-notice"
-          onClick={() => {
-            setImportMode("new");
-            setSidebarOpen(false);
-          }}
-        >
-          <Plus size={18} />
-          {hi ? "नई सूचना" : "New notice"}
-          <span className="plus-key">+</span>
-        </button>
-        <p className="nav-label">{hi ? "आपका कार्यक्षेत्र" : "YOUR WORKSPACE"}</p>
-        <nav aria-label="Main navigation">
+        <nav className="top-navigation" aria-label="Main navigation">
           <button
-            className={`nav-item ${view === "notices" ? "active" : ""}`}
+            className={view === "notices" ? "active" : ""}
             onClick={() => {
               setView("notices");
               setSidebarOpen(false);
             }}
           >
-            <ClipboardList size={19} />
-            <span>{hi ? "मेरी सूचनाएँ" : "My notices"}</span>
-            <span className="nav-count">{workspace.notices.length}</span>
+            {hi ? "नोटिसबोर्ड" : "Noticeboard"}
           </button>
           <button
-            className={`nav-item ${view === "calendar" ? "active" : ""}`}
+            className={view === "calendar" ? "active" : ""}
             onClick={() => {
               setView("calendar");
               setSidebarOpen(false);
             }}
           >
-            <CalendarDays size={19} />
-            <span>{hi ? "अगले कदमों का कैलेंडर" : "Action calendar"}</span>
+            {hi ? "तारीख़ें" : "Dates"}
           </button>
+          <button className="guide-nav" onClick={() => setHelp(true)}>
+            {hi ? "कैसे इस्तेमाल करें" : "How to use it"}
+            <ArrowUpRight size={12} />
+          </button>
+        </nav>
+        <div className="topbar-right">
+          <div className="language-toggle" role="group" aria-label="Interface language">
+            <Languages size={17} />
+            <button
+              className={!hi ? "selected" : ""}
+              aria-pressed={!hi}
+              onClick={() => setWorkspace((w) => ({ ...w, language: "en" }))}
+            >
+              EN
+            </button>
+            <span>/</span>
+            <button
+              className={hi ? "selected" : ""}
+              aria-pressed={hi}
+              onClick={() => setWorkspace((w) => ({ ...w, language: "hi" }))}
+            >
+              हिं
+            </button>
+          </div>
+          <button className="button primary header-add" aria-label={hi ? "सूचना जोड़ें" : "Pin a notice"} onClick={() => setImportMode("new")}>
+            <Plus size={17} />
+            <span>{hi ? "सूचना जोड़ें" : "Pin a notice"}</span>
+          </button>
+        </div>
+      </header>
+
+      <div className="board-layout">
+        {sidebarOpen && (
           <button
-            className="nav-item"
+            className="sidebar-scrim"
+            aria-label="Close navigation"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+        <aside
+          className={`sidebar ${sidebarOpen ? "open" : ""}`}
+          inert={isMobile && !sidebarOpen}
+          aria-label="Saved circulars"
+        >
+          <div className="board-label">
+            <span className="pin-dot" />
+            {hi ? "बोर्ड पर" : "ON THE BOARD"}
+            <span className="file-count">{String(workspace.notices.length).padStart(2, "0")}</span>
+          </div>
+          <label className="notice-search">
+            <Search size={15} />
+            <input
+              aria-label="Find a circular"
+              placeholder={hi ? "सूचना खोजें" : "Find a circular"}
+              value={noticeQuery}
+              onChange={(event) => setNoticeQuery(event.target.value)}
+            />
+          </label>
+          <div className="sidebar-notices">
+            {visibleNotices.map((item, index) => (
+              <button
+                className={`sidebar-notice ${item.id === notice.id && view === "notices" ? "selected" : ""}`}
+                key={item.id}
+                onClick={() => activate(item.id)}
+              >
+                <span className="notice-file-number">{String(index + 1).padStart(2, "0")}</span>
+                <div>
+                  <strong>{item.title}</strong>
+                  <small>
+                    {item.document.kind === "sample"
+                      ? "EXAMPLE CIRCULAR"
+                      : item.document.kind.toUpperCase()}
+                    {item.version > 1 ? ` / REV. ${item.version}` : ""}
+                  </small>
+                </div>
+                <ChevronArrow />
+              </button>
+            ))}
+          </div>
+          {!visibleNotices.length && <p className="sidebar-empty">No circulars match that name.</p>}
+          <button
+            className="add-to-board"
             onClick={() => {
-              setHelp(true);
+              setImportMode("new");
               setSidebarOpen(false);
             }}
           >
-            <CircleHelp size={19} />
-            <span>{hi ? "यह कैसे काम करता है" : "How it works"}</span>
-            <ArrowUpRight size={14} />
-          </button>
-        </nav>
-        <div className="notice-list-heading">
-          <p className="nav-label">{hi ? "सहेजी गई सूचनाएँ" : "YOUR NOTICES"}</p>
-          <button
-            className="icon-button"
-            aria-label="Add a notice"
-            onClick={() => setImportMode("new")}
-          >
             <Plus size={15} />
+            {hi ? "एक और सूचना जोड़ें" : "Add another circular"}
           </button>
-        </div>
-        <div className="sidebar-notices">
-          {workspace.notices.map((item) => (
-            <button
-              className={`sidebar-notice ${item.id === notice.id && view === "notices" ? "selected" : ""}`}
-              key={item.id}
-              onClick={() => activate(item.id)}
-            >
-              <span className="notice-dot" />
-              <span>{item.title}</span>
-              {item.document.kind === "sample" && <small>DEMO</small>}
-            </button>
-          ))}
-        </div>
-        <div className="sidebar-bottom">
-          <div className="reassurance-card">
-            <span className="reassurance-icon">
-              <Leaf size={22} strokeWidth={1.6} />
-            </span>
-            <h3>A little less on your mind.</h3>
-            <p>The important things, all in one place. You’ve got this.</p>
+          <div className="sidebar-note">
+            <span className="tape" aria-hidden="true" />
+            <span className="handwritten">Try the change of plan.</span>
+            <p>
+              The consent deadline moves. The packing list changes. See what the update catches.
+            </p>
             <button onClick={loadSample}>
-              Restart the sample demo <ArrowRight size={14} />
+              {hi ? "उदाहरण फिर शुरू करें" : "Restart the sample"}
+              <ArrowRight size={15} />
             </button>
           </div>
-          <div className="local-status">
-            <span />
-            <span>{hi ? "इस डिवाइस पर सहेजा गया" : "Saved on this device"}</span>
-            <ShieldCheck size={14} />
+          <div className="sidebar-bottom">
+            <button
+              className="board-settings"
+              onClick={() => {
+                setProfileOpen(true);
+                setSidebarOpen(false);
+              }}
+            >
+              <PencilLine size={16} />
+              <span>{hi ? "बोर्ड अपना बनाएँ" : "Make this your board"}</span>
+            </button>
+            <p>
+              <span className="local-dot" />
+              {hi ? "इसी डिवाइस पर सहेजा गया" : "Saved on this device"}
+            </p>
+            <button className="sidebar-help" onClick={() => setHelp(true)}>
+              <CircleHelp size={14} />
+              How to use it
+            </button>
           </div>
-        </div>
-      </aside>
+        </aside>
 
-      <div className="main-shell" inert={isMobile && sidebarOpen}>
-        <header className="topbar">
-          <div className="breadcrumbs">
+        <main className="main-content" id="main-content" inert={isMobile && sidebarOpen}>
+          <div className="board-context">
             <button
               className="icon-button mobile-menu"
               aria-label="Open navigation"
@@ -534,186 +515,117 @@ export default function NoticeBridge() {
             >
               <Menu size={21} />
             </button>
-            <span>{hi ? "कार्यक्षेत्र" : "Workspace"}</span>
-            <ChevronRight size={14} />
-            <strong>
-              {view === "notices"
+            <span>
+              <span className="context-dot" />
+              {schoolContext ||
+                (hi ? "स्कूल की सूचना, घर के लिए" : "THE THINGS THAT NEED TO COME HOME")}
+            </span>
+            <button className="personalize-link" onClick={() => setProfileOpen(true)}>
+              <PencilLine size={13} />
+              {workspace.profile.name
                 ? hi
-                  ? "मेरी सूचनाएँ"
-                  : "My notices"
+                  ? "बोर्ड बदलें"
+                  : "Edit your board"
                 : hi
-                  ? "कैलेंडर"
-                  : "Action calendar"}
-            </strong>
+                  ? "अपना नाम जोड़ें"
+                  : "Put your name on it"}
+            </button>
           </div>
-          <div className="topbar-right">
-            <div className="language-toggle" role="group" aria-label="Interface language">
-              <Languages size={16} />
-              <button
-                aria-pressed={!hi}
-                className={!hi ? "selected" : ""}
-                onClick={() => setWorkspace((w) => ({ ...w, language: "en" }))}
-              >
-                English
-              </button>
-              <span />
-              <button
-                aria-pressed={hi}
-                className={hi ? "selected" : ""}
-                onClick={() => setWorkspace((w) => ({ ...w, language: "hi" }))}
-              >
-                हिंदी
-              </button>
-            </div>
-            <span className="topbar-divider" />
-            <div className="family-profile">
-              <span className="avatar">
-                <Users size={18} />
-              </span>
-              <span>
-                {hi ? "आपका परिवार" : "Your family"}
-                <small>{hi ? "हर कदम पर साथ" : "One step at a time"}</small>
-              </span>
-            </div>
-          </div>
-        </header>
-
-        <main id="main-content" className="main-content">
           <section className="welcome">
-            <div>
-              <div className="eyebrow">
-                <span />
-                {hi ? "हर परिवार के लिए थोड़ी स्पष्टता" : "A LITTLE CLARITY FOR EVERY FAMILY"}
-              </div>
+            <div className="board-title">
+              <span className="edition-label">
+                {view === "calendar" ? "THE DATE SHEET / 02" : "THE NOTICEBOARD / 01"}
+              </span>
               <h1>
                 {view === "calendar" ? (
-                  hi ? (
-                    "ज़रूरी तारीख़ें,\nएक ही जगह।"
-                  ) : (
-                    "The important dates.\nA little more together."
-                  )
-                ) : hi ? (
-                  "स्कूल की सूचनाएँ,\nअब आसान।"
+                  <>
+                    {hi ? "कौन सी तारीख़" : "WHAT’S DUE"}
+                    <br />
+                    <span>{hi ? "याद रखनी है।" : "& WHEN."}</span>
+                  </>
                 ) : (
                   <>
-                    School updates,
+                    {hi
+                      ? workspace.profile.name
+                        ? `${workspace.profile.name} का`
+                        : "स्कूल का"
+                      : workspace.profile.name
+                        ? `${workspace.profile.name.toUpperCase()}’S`
+                        : "THE SCHOOL"}
                     <br />
-                    <em>made simple.</em>
+                    <span>{hi ? "नोटिसबोर्ड।" : "NOTICEBOARD."}</span>
                   </>
                 )}
               </h1>
               <p>
                 {view === "calendar" ? (
                   hi ? (
-                    "अगले कदम देखें और याद दिलाने के लिए तारीख़ों की पुष्टि करें।"
+                    "सूचना से तारीख़ मिलाएँ। फिर अपने कैलेंडर में जोड़ें।"
                   ) : (
-                    "See what’s coming up. Review a date, then make a little room for it."
+                    "Check the date in the circular. Then put it in your calendar."
                   )
                 ) : hi ? (
-                  "फ़ॉर्म, तारीख़ें और साथ लाने वाली चीज़ें। हर सूचना में अपने परिवार के अगले कदम खोजें।"
+                  "सहमति पत्र, यात्रा शुल्क और साथ लाने वाली चीज़ें।\nक्लास ग्रुप की सूचनाएँ अब एक जगह।"
                 ) : (
                   <>
-                    The forms, the dates, the things to pack.
+                    Consent forms. Trip fees. One more thing to pack.
                     <br />
-                    Find your family’s next steps in every school notice.
+                    The class-group messages, finally in one place.
                   </>
                 )}
               </p>
-            </div>
-            <div className="welcome-illustration" aria-hidden="true">
-              <div className="illustration-orbit" />
-              <span className="ill-star star-one">✳</span>
-              <span className="ill-star star-two">✳</span>
-              <div className="ill-paper">
-                <div className="ill-paper-top">
-                  <FileText size={18} />
-                  <span>THE SCHOOL CIRCULAR</span>
-                </div>
-                <div className="ill-lines">
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                </div>
-                <div className="ill-highlight" />
-                <span className="ill-paper-stamp">
-                  <BookOpen size={20} />
-                </span>
-              </div>
-              <svg className="ill-path" viewBox="0 0 100 80">
-                <path
-                  d="M5 45C60 80 25 0 85 30"
-                  stroke="#a4b29c"
-                  strokeWidth="2"
-                  strokeDasharray="4 5"
-                  fill="none"
-                />
-                <path d="m76 24 11 6-8 8" stroke="#a4b29c" strokeWidth="2" fill="none" />
-              </svg>
-              <div className="ill-action">
+              <div className="board-tally">
                 <span>
-                  <Check size={17} />
+                  <strong>{allActions.filter((action) => !action.completed).length}</strong>{" "}
+                  {hi ? "करने हैं" : "to do"}
                 </span>
-                <div>
-                  A clear next step<small>A little peace of mind.</small>
-                </div>
-                <Heart size={15} />
-              </div>
-              <span className="ill-leaf">
-                <Leaf size={25} strokeWidth={1.3} />
-              </span>
-            </div>
-          </section>
-
-          <section className="stats-row" aria-label="Workspace summary">
-            <div className="stat">
-              <span className="stat-icon sage">
-                <ClipboardList size={20} />
-              </span>
-              <div>
-                <strong>
-                  {allActions.filter((a) => !a.completed).length}
-                  <span>{hi ? "अगले कदम" : "next steps"}</span>
-                </strong>
-                <p>{hi ? "एक-एक करके करें" : "One thing at a time. You’re doing great."}</p>
+                <i />
+                <span>
+                  <strong>{datesToReview}</strong> {hi ? "तारीख़ें जाँचें" : "dates to check"}
+                </span>
+                <i />
+                <span>
+                  <strong>{allActions.filter((action) => action.completed).length}</strong>{" "}
+                  {hi ? "पूरे हुए" : "done"}
+                </span>
               </div>
             </div>
-            <div className="stat">
-              <span className="stat-icon butter">
-                <CalendarDays size={20} />
-              </span>
-              <div>
+            {pinned ? (
+              <button
+                className="pinned-deadline"
+                onClick={() => {
+                  activate(pinned.notice.id);
+                  setSelectedActionId(pinned.action.id);
+                  setEditingDate(pinned.action.id);
+                }}
+                aria-label={`Review pinned deadline: ${pinned.action.summary}`}
+              >
+                <span className="paper-pin" aria-hidden="true" />
+                <span className="deadline-label">PINNED DEADLINE</span>
                 <strong>
-                  {datesToReview}
-                  <span>{hi ? "तारीख़ें जाँचनी हैं" : "dates to review"}</span>
+                  {formatDate(pinned.action.dueDate, workspace.language, { day: "numeric" })}
                 </strong>
+                <span className="deadline-month">
+                  {formatDate(pinned.action.dueDate, workspace.language, {
+                    month: "long",
+                  }).toUpperCase()}
+                </span>
                 <p>
-                  {hi
-                    ? "पुष्टि करें, फिर कैलेंडर में जोड़ें"
-                    : "A quick check, then into your calendar."}
+                  {hi && pinned.action.summaryHi ? pinned.action.summaryHi : pinned.action.summary}
                 </p>
+                <span className="deadline-link">
+                  {pinned.action.reviewed ? "DATE CONFIRMED" : "CHECK THIS DATE"}
+                  <ArrowUpRight size={14} />
+                </span>
+              </button>
+            ) : (
+              <div className="pinned-deadline no-deadlines">
+                <span className="paper-pin" />
+                <span className="deadline-label">PINNED DEADLINES</span>
+                <CalendarDays size={39} />
+                <p>No dated steps waiting. Add a circular to get started.</p>
               </div>
-            </div>
-            <div className="stat">
-              <span className="stat-icon peach">
-                <FileText size={20} />
-              </span>
-              <div>
-                <strong>
-                  {workspace.notices.length}
-                  <span>
-                    {hi
-                      ? "सूचनाएँ एक जगह"
-                      : workspace.notices.length === 1
-                        ? "notice, kept together"
-                        : "notices, kept together"}
-                  </span>
-                </strong>
-                <p>
-                  {hi ? "ज़रूरी जानकारी यहीं है" : "The details are right here when you need them."}
-                </p>
-              </div>
-            </div>
+            )}
           </section>
 
           {view === "calendar" ? (
@@ -721,108 +633,108 @@ export default function NoticeBridge() {
               notices={workspace.notices}
               language={workspace.language}
               onExport={exportCalendar}
-              onOpen={(n, a) => {
-                activate(n.id);
-                setSelectedActionId(a.id);
-                setEditingDate(a.id);
+              onOpen={(item, action) => {
+                activate(item.id);
+                setSelectedActionId(action.id);
+                setEditingDate(action.id);
               }}
             />
           ) : (
             <>
               <div className="workspace-section-heading">
-                <h2>
-                  {hi ? "सूचना से अगले कदम तक" : "From notice to next steps"}
-                  <span className="soft-tag">{hi ? "आसान बना दिया" : "A LITTLE LIGHTER"}</span>
-                </h2>
-                <button className="button secondary small" onClick={exportCalendar}>
-                  <ArrowDownToLine size={15} />
-                  {hi ? "कैलेंडर डाउनलोड करें" : "Export calendar"}
+                <div>
+                  <span className="section-index">THE OPEN CIRCULAR</span>
+                  <h2>{hi ? "पढ़ लिया। अब करना क्या है?" : "Read it. Know what to do."}</h2>
+                </div>
+                <button className="button secondary" onClick={exportCalendar}>
+                  <ArrowDownToLine size={16} />
+                  {hi ? "कैलेंडर डाउनलोड करें" : "Save dates to calendar"}
                 </button>
               </div>
               {notice.revision && (
                 <div className="revision-banner">
-                  <span className="revision-banner-icon">
-                    <GitCompareArrows size={21} />
+                  <span className="revision-stamp">
+                    UPDATED
+                    <br />
+                    CIRCULAR
                   </span>
                   <div>
                     <strong>
                       {notice.revision.changedCount
-                        ? `${notice.revision.changedCount} change${notice.revision.changedCount === 1 ? "" : "s"} found. A quick review, a clearer plan.`
-                        : "Comparison complete. No instruction changes found."}
+                        ? `${notice.revision.changedCount} change${notice.revision.changedCount === 1 ? "" : "s"} since the last circular.`
+                        : "Same instructions. New version filed."}
                     </strong>
                     <p>
-                      Compared with version {notice.version - 1}. Updated steps need a fresh date
-                      confirmation.
+                      Version {notice.version - 1} → {notice.version}. Changed dates need your
+                      confirmation again.
                     </p>
                   </div>
-                  <span>VERSION {notice.version}</span>
+                  <GitCompareArrows size={27} />
                 </div>
               )}
               <div className="notice-workspace">
                 <section className="actions-panel" aria-label="Your next steps">
+                  <div className="sheet-edge" aria-hidden="true" />
+                  <div className="sheet-label">
+                    <span>01 / THE TO-DO SHEET</span>
+                    <Paperclip size={20} />
+                  </div>
                   <div className="notice-overview">
                     <div className="notice-meta">
                       <span className="notice-type">
-                        <FileText size={13} />
-                        {notice.document.kind === "sample"
-                          ? hi
-                            ? "उदाहरण सूचना"
-                            : "SAMPLE NOTICE"
-                          : hi
-                            ? "स्कूल की सूचना"
-                            : "SCHOOL NOTICE"}
+                        {notice.document.kind === "sample" ? "EXAMPLE CIRCULAR" : "SCHOOL CIRCULAR"}
                       </span>
-                      {notice.document.publishedDate && (
-                        <span>
-                          {formatDate(notice.document.publishedDate, workspace.language, {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })}
-                        </span>
-                      )}
+                      <span>
+                        {notice.document.publishedDate
+                          ? formatDate(notice.document.publishedDate, workspace.language, {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })
+                          : "UNDATED"}
+                      </span>
                     </div>
                     <h2>{notice.title}</h2>
-                    <p className="notice-audience">
-                      <Users size={14} />
-                      {notice.audience}
-                    </p>
+                    <p className="notice-audience">{notice.audience}</p>
                     <p className="notice-summary">
                       {hi && notice.summaryHi ? notice.summaryHi : notice.summary}
                     </p>
                     <div className="notice-tools">
                       <span className="extraction-tag">
-                        <span />
-                        {notice.mode === "ai" ? "AI extraction" : "Local extraction"}
-                        <span className="tag-dot">·</span>v{notice.version}
+                        {notice.mode === "ai" ? "AI extraction" : "English extraction"} / v
+                        {notice.version}
                       </span>
                       <div className="notice-tool-buttons">
                         <button className="text-button" onClick={() => setImportMode("revision")}>
-                          <GitCompareArrows size={14} />
-                          {hi ? "नया संस्करण जोड़ें" : "Add a revision"}
+                          <GitCompareArrows size={15} />
+                          {hi ? "नया संस्करण मिलाएँ" : "Compare a new version"}
                         </button>
                         <button
                           className="icon-button remove-notice"
                           aria-label="Remove current notice"
-                          title="Remove this notice from this device"
+                          title="Remove this notice"
                           onClick={() => setDeleting(true)}
                         >
                           <Trash2 size={15} />
                         </button>
                       </div>
                     </div>
-                    {notice.document.kind === "sample" && notice.version === 1 && (
-                      <button className="sample-revision" onClick={sampleRevision}>
-                        <span>
-                          <Sparkles size={15} />
-                          <span>What if the school changes the plan?</span>
-                        </span>
-                        <strong>
-                          Try a sample revision <ArrowRight size={13} />
-                        </strong>
-                      </button>
-                    )}
                   </div>
+                  {notice.document.kind === "sample" && notice.version === 1 && (
+                    <button className="sample-revision" onClick={sampleRevision}>
+                      <span className="revision-demo-mark">
+                        <GitCompareArrows size={20} />
+                      </span>
+                      <div>
+                        <strong>The school just sent an update.</strong>
+                        <span>New deadline. One extra thing to pack.</span>
+                      </div>
+                      <span className="sample-revision-link">
+                        {hi ? "नया संस्करण देखें" : "Load revised circular"}
+                        <ArrowRight size={16} />
+                      </span>
+                    </button>
+                  )}
                   {notice.warning && (
                     <div className="notice-warning" role="alert">
                       <AlertCircle size={16} />
@@ -836,7 +748,7 @@ export default function NoticeBridge() {
                         className={filter === "todo" ? "selected" : ""}
                         onClick={() => setFilter("todo")}
                       >
-                        {hi ? "अगले कदम" : "Next steps"}
+                        {hi ? "करने हैं" : "To do"}
                         <span>{pending.length}</span>
                       </button>
                       <button
@@ -844,196 +756,106 @@ export default function NoticeBridge() {
                         className={filter === "done" ? "selected" : ""}
                         onClick={() => setFilter("done")}
                       >
-                        {hi ? "पूरे हुए" : "Completed"}
+                        {hi ? "पूरे हुए" : "Done"}
                         <span>{completed.length}</span>
                       </button>
                     </div>
                     <button
-                      className="icon-button"
+                      className="listen-steps"
                       aria-label={speaking ? "Stop reading" : "Read the action checklist aloud"}
-                      title="Listen to your next steps"
-                      onClick={readSteps}
                       disabled={!notice.actions.length}
+                      onClick={readSteps}
                     >
-                      {speaking ? <VolumeX size={18} /> : <Headphones size={18} />}
+                      {speaking ? <VolumeX size={16} /> : <Headphones size={16} />}
+                      <span>{speaking ? "Stop" : "Read to me"}</span>
                     </button>
                   </div>
                   <div className="action-list">
                     {shown.length ? (
-                      shown.map((action, index) => {
-                        const Icon = ICONS[action.kind];
-                        return (
-                          <article
-                            className={`action-card ${action.completed ? "completed" : ""} ${action.change === "updated" || action.change === "added" ? "changed" : ""}`}
-                            key={action.id}
-                          >
-                            <div className="action-top">
-                              <span className={`action-kind ${action.kind}`}>
-                                <Icon size={19} strokeWidth={1.7} />
-                              </span>
-                              <span className="step-number">
-                                {hi ? "कदम" : "STEP"} {String(index + 1).padStart(2, "0")}
-                              </span>
-                              {action.change === "updated" && (
-                                <span className="change-tag">Updated</span>
-                              )}
-                              {action.change === "added" && (
-                                <span className="change-tag">New step</span>
-                              )}
-                              {action.obligation === "optional" && (
-                                <span className="optional-tag">Optional</span>
-                              )}
-                              <button
-                                className={`complete-button ${action.completed ? "checked" : ""}`}
-                                aria-label={`${action.completed ? "Mark incomplete" : "Mark complete"}: ${action.summary}`}
-                                aria-pressed={action.completed}
-                                onClick={() =>
-                                  updateAction(action.id, { completed: !action.completed })
-                                }
-                              >
-                                {action.completed && <Check size={15} />}
-                              </button>
-                            </div>
-                            <h3>{hi && action.summaryHi ? action.summaryHi : action.summary}</h3>
-                            {hi && !action.summaryHi && (
-                              <p className="original-language">
-                                मूल भाषा में · अनुवाद के लिए AI विकल्प इस्तेमाल करें
-                              </p>
-                            )}
-                            {action.previous && (
-                              <div className="previous-details">
-                                {action.previous.dueDate !== action.dueDate ? (
-                                  <>
-                                    <span>
-                                      Previously{" "}
-                                      {formatDate(action.previous.dueDate, workspace.language)}
-                                    </span>
-                                    <ArrowRight size={12} />
-                                    <strong>
-                                      {action.dueDate
-                                        ? formatDate(action.dueDate, workspace.language)
-                                        : "Check new date"}
-                                    </strong>
-                                  </>
-                                ) : (
-                                  <>
-                                    <span>Previously: {action.previous.summary}</span>
-                                  </>
-                                )}
-                              </div>
-                            )}
-                            <button
-                              className={`source-link ${selectedActionId === action.id && !sourcePrevious ? "selected" : ""}`}
-                              onClick={() => showSource(action)}
-                            >
-                              {hi ? "स्रोत देखें" : "See source"}
-                              <ArrowUpRight size={13} />
-                              <span>Quoted from your notice</span>
-                            </button>
-                            <div className="action-bottom">
-                              <button
-                                className={`due-badge ${action.dateIssue ? "uncertain" : ""} ${action.reviewed ? "confirmed" : ""}`}
-                                onClick={() => {
-                                  setEditingDate(editingDate === action.id ? null : action.id);
-                                  showSource(action);
-                                }}
-                              >
-                                <CalendarDays size={14} />
-                                {formatDeadline(action, workspace.language)}
-                                {action.reviewed && <Check size={12} />}
-                              </button>
-                              <button
-                                className={`review-date ${action.reviewed ? "reviewed" : ""}`}
-                                onClick={() => {
-                                  setEditingDate(editingDate === action.id ? null : action.id);
-                                  showSource(action);
-                                }}
-                              >
-                                {action.reviewed
-                                  ? hi
-                                    ? "पुष्टि हो गई"
-                                    : "Date confirmed"
-                                  : hi
-                                    ? "तारीख़ जाँचें"
-                                    : "Review date"}
-                                {action.reviewed ? (
-                                  <CheckCheck size={13} />
-                                ) : (
-                                  <ChevronRight size={13} />
-                                )}
-                              </button>
-                            </div>
-                            {action.dateIssue && editingDate !== action.id && (
-                              <p className="date-issue">
-                                <AlertCircle size={13} />
-                                {action.dateIssue}
-                              </p>
-                            )}
-                            {editingDate === action.id && (
-                              <DateReview
-                                key={action.id}
-                                action={action}
-                                onClose={() => setEditingDate(null)}
-                                onConfirm={(date) => {
-                                  updateAction(action.id, {
-                                    dueDate: date,
-                                    dateIssue: null,
-                                    reviewed: true,
-                                  });
-                                  setEditingDate(null);
-                                  setToast(
-                                    "Date confirmed. This step can now be added to your calendar.",
-                                  );
-                                }}
-                              />
-                            )}
-                          </article>
-                        );
-                      })
+                      shown.map((action, index) => (
+                        <ActionCard
+                          key={action.id}
+                          action={action}
+                          index={index}
+                          language={workspace.language}
+                          selected={selectedActionId === action.id && !sourcePrevious}
+                          editing={editingDate === action.id}
+                          onToggle={() => updateAction(action.id, { completed: !action.completed })}
+                          onSource={() => showSource(action)}
+                          onReview={() => {
+                            setEditingDate(editingDate === action.id ? null : action.id);
+                            setSelectedActionId(action.id);
+                            setSourcePrevious(false);
+                          }}
+                          onCancel={() => setEditingDate(null)}
+                          onConfirm={(date) => {
+                            updateAction(action.id, {
+                              dueDate: date,
+                              dateIssue: null,
+                              reviewed: true,
+                            });
+                            setEditingDate(null);
+                            setToast("Date confirmed. Ready for calendar export.");
+                          }}
+                        />
+                      ))
                     ) : (
                       <div className="empty-state">
-                        <CheckCheck size={32} />
+                        <Check size={32} />
                         <h3>
                           {filter === "done"
-                            ? "A little progress goes a long way."
+                            ? "Nothing ticked off yet."
                             : notice.actions.length
-                              ? "You’re all caught up."
-                              : "No clear next steps found."}
+                              ? "This circular is done."
+                              : "No clear instructions found."}
                         </h3>
                         <p>
                           {filter === "done"
-                            ? "Tick a step when it’s done. It will be waiting for you here."
+                            ? "Completed steps will be filed here."
                             : notice.actions.length
-                              ? "All the steps in this notice are complete. Enjoy a little peace of mind."
-                              : "Read the source text for context. In local mode, try keeping each English instruction on its own line, or use AI extraction."}
+                              ? "Every step on this sheet has been checked off."
+                              : "Read the circular alongside. Try AI extraction for more complex wording."}
                         </p>
                       </div>
                     )}
                   </div>
                   {notice.revision?.removed.length ? (
                     <div className="removed-steps">
-                      <strong>Removed in this revision</strong>
-                      {notice.revision.removed.map((a) => (
-                        <p key={a.id}>
-                          <s>{a.summary}</s>
+                      <strong>Crossed off in this version</strong>
+                      {notice.revision.removed.map((action) => (
+                        <p key={action.id}>
+                          <s>{action.summary}</s>
                         </p>
                       ))}
-                      <small>
-                        If you previously added these reminders to a calendar, remove them there
-                        too.
-                      </small>
+                      <small>Remove any old reminders from your calendar too.</small>
                     </div>
                   ) : null}
                   <div className="actions-footnote">
-                    <ShieldCheck size={15} />
+                    <Check size={14} />
                     <span>
-                      {hi
-                        ? "पहले मूल सूचना देखें, फिर तारीख़ की पुष्टि करें।"
-                        : "Your call, always. Check the source before confirming a date."}
+                      {completed.length}/{notice.actions.length} {hi ? "कदम पूरे" : "steps done"}
                     </span>
+                    <div
+                      className="completion-track"
+                      role="progressbar"
+                      aria-label="Checklist completion"
+                      aria-valuenow={completed.length}
+                      aria-valuemin={0}
+                      aria-valuemax={Math.max(1, notice.actions.length)}
+                    >
+                      <span
+                        style={{
+                          width: `${notice.actions.length ? (completed.length / notice.actions.length) * 100 : 0}%`,
+                        }}
+                      />
+                    </div>
                   </div>
                 </section>
-                <div ref={sourceRef} className="source-column">
+                <div className="source-column" ref={sourceRef}>
+                  <div className="sheet-label source-label">
+                    <span>02 / AS SENT BY THE SCHOOL</span>
+                    <span className="handwritten">Keep the receipt.</span>
+                  </div>
                   <SourcePanel
                     notice={notice}
                     action={selectedAction}
@@ -1043,34 +865,38 @@ export default function NoticeBridge() {
                     speaking={speaking}
                     language={workspace.language}
                   />
-                  <div className="kind-note">
-                    <span>
-                      <Heart size={16} />
+                  <div className="source-annotation">
+                    <svg viewBox="0 0 62 40" aria-hidden="true">
+                      <path
+                        d="M58 32C22 38 6 28 12 5M3 13 12 4l9 8"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    <span className="handwritten">
+                      {hi
+                        ? "हर कदम के पीछे, मूल शब्द।"
+                        : "Every step has a source.\nTap it. Check it."}
                     </span>
-                    <p>
-                      {hi ? (
-                        "हर परिवार तक जानकारी पहुँचना ज़रूरी है।"
-                      ) : (
-                        <>
-                          A clear notice is a small thing.
-                          <br />
-                          <strong>Being included isn’t.</strong>
-                        </>
-                      )}
-                    </p>
-                    <span className="kind-note-decoration">✳</span>
                   </div>
                 </div>
               </div>
             </>
           )}
           <footer className="page-footer">
-            <span>Made with care, for the everyday.</span>
             <span>
-              <span className="footer-flower">✳</span> A little bridge. A lot more clarity.
+              <Paperclip size={13} />
+              NoticeBridge · School → home.
+            </span>
+            <span>
+              {workspace.profile.school || "A place for the things the school sends home."}
             </span>
             <a href="https://github.com/ashank-crazy/noticebridge" target="_blank" rel="noreferrer">
-              Open source <ArrowUpRight size={12} />
+              GitHub
+              <ArrowUpRight size={12} />
             </a>
           </footer>
         </main>
@@ -1085,99 +911,89 @@ export default function NoticeBridge() {
           onSample={loadSample}
         />
       )}
+      {profileOpen && (
+        <ProfileDialog
+          profile={workspace.profile}
+          language={workspace.language}
+          onClose={() => setProfileOpen(false)}
+          onSave={(profile) => {
+            setWorkspace((w) => ({ ...w, profile }));
+            setProfileOpen(false);
+            setToast("Board details saved on this device.");
+          }}
+        />
+      )}
       {deleting && (
-        <Modal title="Remove this notice?" onClose={() => setDeleting(false)}>
+        <Modal title="Remove this circular?" onClose={() => setDeleting(false)}>
           <p className="modal-intro">
-            <strong>{notice.title}</strong> and its saved checklist will be removed from this
-            browser. Calendar reminders you already imported stay in your calendar app. If this is
-            your last notice, the sample will be shown.
+            <strong>{notice.title}</strong> and its checklist will be removed from this browser.
+            Calendar reminders you already imported stay in your calendar app. If this is your last
+            notice, the sample will be shown.
           </p>
           <div className="modal-footer">
             <button className="button secondary" onClick={() => setDeleting(false)}>
-              Keep notice
+              Keep it
             </button>
             <button className="button primary" onClick={removeNotice}>
               <Trash2 size={16} />
-              Remove notice
+              Remove circular
             </button>
           </div>
         </Modal>
       )}
       {help && (
-        <Modal
-          title={hi ? "सूचना से स्पष्टता तक" : "A little bridge from notice to clarity"}
-          onClose={() => setHelp(false)}
-        >
+        <Modal title="Circular in. Instructions out." onClose={() => setHelp(false)}>
           <div className="help-steps">
             <div>
               <span>01</span>
               <div>
-                <h3>Bring a notice</h3>
+                <h3>Pin a notice.</h3>
                 <p>
-                  Upload a PDF or an English screenshot, or paste the text. Check extracted text
-                  after OCR.
+                  Upload a PDF, screenshot, or pasted text. Check the extracted wording before
+                  continuing.
                 </p>
               </div>
             </div>
             <div>
               <span>02</span>
               <div>
-                <h3>Find the next steps</h3>
+                <h3>Check the instructions.</h3>
                 <p>
-                  Every checklist item links to its source wording. The local engine handles common
-                  English instructions. Optional AI adds richer extraction and Hindi translation.
+                  Tick off completed steps. Use “See source” to find the original instruction.
+                  Confirm dates before saving them to your calendar.
                 </p>
               </div>
             </div>
             <div>
               <span>03</span>
               <div>
-                <h3>Keep the dates you confirm</h3>
+                <h3>Compare the next circular.</h3>
                 <p>
-                  Check the original and confirm the date. Export unfinished steps as all-day
-                  calendar reminders with an alert the day before. Exact times remain in the notice.
-                </p>
-              </div>
-            </div>
-            <div>
-              <span>04</span>
-              <div>
-                <h3>Catch a change of plan</h3>
-                <p>
-                  Add a revision to compare instructions. Changed steps need a fresh confirmation.
-                  Your previous source version stays available; calendar files must be re-imported
-                  manually.
+                  Use “Compare a new version” when the school sends a revision. Changed instructions
+                  are marked and the previous circular stays available.
                 </p>
               </div>
             </div>
           </div>
-          <div className="help-privacy">
-            <ShieldCheck size={20} />
-            <div>
-              <strong>Your notices stay close.</strong>
-              <p>
-                Notice text is saved in this browser’s local storage. There’s no account or cloud
-                sync. AI processing happens only when you choose it and sends extracted text to
-                OpenAI. Don’t use shared-device storage for private student details.
-              </p>
-            </div>
-          </div>
+          <p className="help-privacy">
+            Your board is saved in this browser. AI processing is optional and sends the notice text
+            to OpenAI. Calendar files need to be imported manually.
+          </p>
           <div className="help-status">
-            <span className="status-dot" />
+            <span className="local-dot" />
             {aiAvailable
-              ? "AI connection available. Choose it separately for each import."
-              : "Local extraction is active. Optional AI setup is documented in the repository."}
+              ? "AI extraction available when you choose it."
+              : "Local English extraction is active."}
           </div>
           <button className="button primary" onClick={() => setHelp(false)}>
-            Got it <Check size={16} />
+            Back to the board
+            <ArrowRight size={15} />
           </button>
         </Modal>
       )}
       {toast && (
         <div className="toast" role="status">
-          <span className="toast-mark">
-            <Bell size={17} />
-          </span>
+          <Bell size={17} />
           <p>{toast}</p>
           <button className="icon-button" aria-label="Dismiss message" onClick={() => setToast("")}>
             <X size={16} />
@@ -1186,4 +1002,8 @@ export default function NoticeBridge() {
       )}
     </div>
   );
+}
+
+function ChevronArrow() {
+  return <ArrowUpRight size={13} />;
 }

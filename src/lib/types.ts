@@ -60,11 +60,18 @@ export const analysisSchema = z.object({
     .optional(),
 });
 
+export const profileSchema = z.object({
+  name: z.string().max(28),
+  school: z.string().max(70),
+  className: z.string().max(30),
+});
+
 export const workspaceSchema = z.object({
   version: z.literal(1),
   notices: z.array(analysisSchema).max(20),
   activeId: z.string(),
   language: z.enum(["en", "hi"]),
+  profile: profileSchema.default({ name: "", school: "", className: "" }),
 });
 
 export type SourceDocument = z.infer<typeof documentSchema>;
@@ -72,3 +79,4 @@ export type ActionItem = z.infer<typeof actionSchema>;
 export type NoticeAnalysis = z.infer<typeof analysisSchema>;
 export type Workspace = z.infer<typeof workspaceSchema>;
 export type Language = Workspace["language"];
+export type BoardProfile = z.infer<typeof profileSchema>;
