@@ -110,6 +110,7 @@ export default function ActionCard({
   const dateChanged = action.previous && action.previous.dueDate !== action.dueDate;
   return (
     <article
+      id={`step-${action.id}`}
       className={`action-card ${action.completed ? "completed" : ""} ${action.change === "updated" || action.change === "added" ? "changed" : ""} ${selected ? "source-selected" : ""}`}
     >
       <div className="action-top">

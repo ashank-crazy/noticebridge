@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { FileText, Headphones, Highlighter, VolumeX } from "lucide-react";
 import type { ActionItem, Language, NoticeAnalysis } from "@/lib/types";
 
@@ -29,6 +30,17 @@ export default function SourcePanel({
     return result;
   });
   const quote = !previous && action ? action.evidence : null;
+  const paperRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const paper = paperRef.current;
+    const mark = paper?.querySelector("mark");
+    if (!paper || !mark) return;
+    const bounds = paper.getBoundingClientRect();
+    const highlight = mark.getBoundingClientRect();
+    if (highlight.top < bounds.top || highlight.bottom > bounds.bottom) {
+      paper.scrollTop += highlight.top - bounds.top - paper.clientHeight / 3;
+    }
+  }, [action?.evidence.start, document.id, previous]);
   return (
     <section
       className="source-panel"
@@ -86,6 +98,7 @@ export default function SourcePanel({
         </div>
       )}
       <div
+        ref={paperRef}
         className="source-paper"
         tabIndex={0}
         aria-label="Read the source text. Highlighted text supports the selected action."

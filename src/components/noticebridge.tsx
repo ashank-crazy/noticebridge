@@ -177,6 +177,18 @@ export default function NoticeBridge() {
       sourceRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  function openAction(item: NoticeAnalysis, action: ActionItem) {
+    activate(item.id);
+    setSelectedActionId(action.id);
+    setEditingDate(action.id);
+    window.requestAnimationFrame(() =>
+      document.getElementById(`step-${action.id}`)?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        block: "center",
+      }),
+    );
+  }
+
   function loadSample() {
     const sample = analyzeLocal(sampleDocument());
     setWorkspace((w) => ({
@@ -407,7 +419,11 @@ export default function NoticeBridge() {
               हिं
             </button>
           </div>
-          <button className="button primary header-add" aria-label={hi ? "सूचना जोड़ें" : "Pin a notice"} onClick={() => setImportMode("new")}>
+          <button
+            className="button primary header-add"
+            aria-label={hi ? "सूचना जोड़ें" : "Pin a notice"}
+            onClick={() => setImportMode("new")}
+          >
             <Plus size={17} />
             <span>{hi ? "सूचना जोड़ें" : "Pin a notice"}</span>
           </button>
@@ -475,10 +491,8 @@ export default function NoticeBridge() {
           </button>
           <div className="sidebar-note">
             <span className="tape" aria-hidden="true" />
-            <span className="handwritten">Try the change of plan.</span>
-            <p>
-              The consent deadline moves. The packing list changes. See what the update catches.
-            </p>
+            <span className="handwritten">Spot the changed date.</span>
+            <p>The first circular says 24 October. The next one says 27. Compare the two.</p>
             <button onClick={loadSample}>
               {hi ? "उदाहरण फिर शुरू करें" : "Restart the sample"}
               <ArrowRight size={15} />
@@ -517,8 +531,7 @@ export default function NoticeBridge() {
             </button>
             <span>
               <span className="context-dot" />
-              {schoolContext ||
-                (hi ? "स्कूल की सूचना, घर के लिए" : "THE THINGS THAT NEED TO COME HOME")}
+              {schoolContext || (hi ? "स्कूल की सूचना, घर के लिए" : "YOUR SCHOOL CIRCULARS")}
             </span>
             <button className="personalize-link" onClick={() => setProfileOpen(true)}>
               <PencilLine size={13} />
@@ -593,11 +606,7 @@ export default function NoticeBridge() {
             {pinned ? (
               <button
                 className="pinned-deadline"
-                onClick={() => {
-                  activate(pinned.notice.id);
-                  setSelectedActionId(pinned.action.id);
-                  setEditingDate(pinned.action.id);
-                }}
+                onClick={() => openAction(pinned.notice, pinned.action)}
                 aria-label={`Review pinned deadline: ${pinned.action.summary}`}
               >
                 <span className="paper-pin" aria-hidden="true" />
@@ -633,18 +642,14 @@ export default function NoticeBridge() {
               notices={workspace.notices}
               language={workspace.language}
               onExport={exportCalendar}
-              onOpen={(item, action) => {
-                activate(item.id);
-                setSelectedActionId(action.id);
-                setEditingDate(action.id);
-              }}
+              onOpen={openAction}
             />
           ) : (
             <>
               <div className="workspace-section-heading">
-                <div>
-                  <span className="section-index">THE OPEN CIRCULAR</span>
-                  <h2>{hi ? "पढ़ लिया। अब करना क्या है?" : "Read it. Know what to do."}</h2>
+                <div className="open-circular-label">
+                  <Paperclip size={15} />
+                  <h2>{hi ? "आपके बोर्ड पर खुली सूचना" : "OPEN ON YOUR BOARD"}</h2>
                 </div>
                 <button className="button secondary" onClick={exportCalendar}>
                   <ArrowDownToLine size={16} />
@@ -696,9 +701,6 @@ export default function NoticeBridge() {
                     </div>
                     <h2>{notice.title}</h2>
                     <p className="notice-audience">{notice.audience}</p>
-                    <p className="notice-summary">
-                      {hi && notice.summaryHi ? notice.summaryHi : notice.summary}
-                    </p>
                     <div className="notice-tools">
                       <span className="extraction-tag">
                         {notice.mode === "ai" ? "AI extraction" : "English extraction"} / v
@@ -726,8 +728,8 @@ export default function NoticeBridge() {
                         <GitCompareArrows size={20} />
                       </span>
                       <div>
-                        <strong>The school just sent an update.</strong>
-                        <span>New deadline. One extra thing to pack.</span>
+                        <strong>Try the revised circular.</strong>
+                        <span>Deadline moved. Packing list changed.</span>
                       </div>
                       <span className="sample-revision-link">
                         {hi ? "नया संस्करण देखें" : "Load revised circular"}
@@ -854,7 +856,7 @@ export default function NoticeBridge() {
                 <div className="source-column" ref={sourceRef}>
                   <div className="sheet-label source-label">
                     <span>02 / AS SENT BY THE SCHOOL</span>
-                    <span className="handwritten">Keep the receipt.</span>
+                    <span className="handwritten">Original stays here.</span>
                   </div>
                   <SourcePanel
                     notice={notice}

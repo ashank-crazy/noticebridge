@@ -2,7 +2,9 @@
 
 School circulars get buried in message threads. NoticeBridge puts the instructions, deadlines, and revised plans on one noticeboard.
 
-![NoticeBridge](docs/noticebridge-desktop.png)
+![NoticeBridge](docs/noticeboard-cover.jpg)
+
+[See the revision comparison](docs/noticeboard.jpg)
 
 ## What it does
 
