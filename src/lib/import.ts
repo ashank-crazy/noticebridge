@@ -13,7 +13,8 @@ export async function readNoticeFile(file: File, progress: (message: string) => 
     progress("Opening your PDF…");
     const pdfjs = await import("pdfjs-dist");
     pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
-    const pdf = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()), isEvalSupported: false }).promise;
+    const loadingTask = pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) });
+    const pdf = await loadingTask.promise;
     let worker: Awaited<ReturnType<typeof makeOcrWorker>> | undefined;
     try {
       if (pdf.numPages > MAX_PAGES) throw new Error(`Please use a notice with ${MAX_PAGES} pages or fewer.`);
@@ -47,7 +48,7 @@ export async function readNoticeFile(file: File, progress: (message: string) => 
         if (pages.join("\n\n").length > MAX_TEXT) throw new Error("This PDF contains too much text. Please upload only the notice pages.");
       }
       return { text: pages.join("\n\n"), kind: "pdf" };
-    } finally { await worker?.terminate(); await pdf.destroy(); }
+    } finally { await worker?.terminate(); await loadingTask.destroy(); }
   }
   if (/^image\/(?:png|jpeg|webp|bmp)$/.test(file.type) || /\.(?:png|jpe?g|webp|bmp)$/i.test(file.name)) {
     progress("Reading your image… first use downloads the text recognition model.");
