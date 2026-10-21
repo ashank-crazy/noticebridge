@@ -3,4 +3,3 @@ node_modules
 coverage
 public/pdf.worker.min.mjs
 package-lock.json
-AGENTS.md
