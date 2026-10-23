@@ -39,6 +39,10 @@ Choose AI processing when importing a notice to enable richer extraction and Hin
 
 ## Demo
 
+[Watch the 2:22 narrated demo](demo/noticebridge-demo.mp4) · [Transcript](demo/transcript.md)
+
+The video walks through the working app with the fictional museum-trip sample and local English extraction.
+
 Open the museum-trip notice, select **See source**, and confirm a deadline. Choose **Load revised circular**: the consent deadline moves from 24 to 27 October, and a school ID card is added to the packing list.
 
 ## Development

@@ -1,0 +1,98 @@
+[
+  {
+    "image": "01-board.jpg",
+    "label": "01 / THE PROBLEM",
+    "title": "ONE BOARD.\nFEWER MISSED\nDETAILS.",
+    "body": "Consent forms. Trip fees.\nSomething else to pack.\n\nThe class-group messages,\nfinally in one place.",
+    "note": "NoticeBridge  /  School to home",
+    "narration": "School circulars arrive as PDFs, photos, and class-group messages. The small details are easy to lose. NoticeBridge gives a family one noticeboard for what needs doing."
+  },
+  {
+    "image": "02-import.jpg",
+    "label": "02 / PIN A NOTICE",
+    "title": "START WITH\nWHAT SCHOOL\nSENT HOME.",
+    "body": "PDFs, English screenshots,\nand pasted text.\n\nRead and check the extracted\nwording before continuing.",
+    "note": "This demo uses local English extraction.",
+    "narration": "Pin a notice from a PDF, English screenshot, or pasted text. File reading happens in the browser. This walkthrough uses the built-in museum trip sample and local English extraction."
+  },
+  {
+    "image": "03-checklist.jpg",
+    "label": "03 / TRACE EVERY STEP",
+    "title": "THE TASK.\nTHE EXACT\nWORDS BEHIND IT.",
+    "body": "Consent. Payment. Packing.\n\nEach extracted instruction\nkeeps a clickable source quote.",
+    "note": "A checklist you can check against the circular.",
+    "narration": "The circular becomes a checklist: submit the consent form, pay the fee, and pack for the trip. Every extracted step keeps an exact quote from the source."
+  },
+  {
+    "image": "04-review.jpg",
+    "label": "04 / CHECK THE DATE",
+    "title": "READ IT.\nCHECK IT.\nTHEN CONFIRM.",
+    "body": "Review the original sentence\nbefore making a reminder.\n\nUnclear dates stay out of the\ncalendar export until reviewed.",
+    "note": "Dates need a person's confirmation.",
+    "narration": "Before creating a reminder, check the date against the highlighted sentence. Confirm it yourself. Missing years and unclear dates stay out of the export until they are reviewed."
+  },
+  {
+    "image": "05-revision.jpg",
+    "label": "05 / THE SCHOOL SENDS AN UPDATE",
+    "title": "SAME TRIP.\nA DIFFERENT\nDEADLINE.",
+    "body": "Compare the revised circular.\n\nThe previous date is crossed\nout. The new date needs\nyour confirmation again.",
+    "note": "Consent deadline: 24 to 27 October",
+    "narration": "Now the school sends a revision. The consent deadline moves from the twenty-fourth to the twenty-seventh of October. NoticeBridge crosses out the old date and asks for confirmation again."
+  },
+  {
+    "image": "06-packing.jpg",
+    "label": "06 / CATCH THE OTHER CHANGE",
+    "title": "AND DON'T\nFORGET THE\nSCHOOL ID.",
+    "body": "The packing list changed too.\n\nChanged steps are marked.\nUnchanged progress is kept.\nThe source stays alongside.",
+    "note": "2 changes found. Payment stays completed.",
+    "narration": "The packing list also adds a school ID card. Both changes are marked, while the unchanged payment stays completed. The current circular remains beside the checklist for checking."
+  },
+  {
+    "image": "07-hindi.jpg",
+    "label": "07 / HELP AT HOME",
+    "title": "ONE PLAN.\nMORE WAYS\nTO READ IT.",
+    "body": "English / Hindi board controls.\nHindi sample instructions.\nDevice read-aloud.\n\nImported-notice translation\nuses optional AI processing.",
+    "note": "The original wording stays available.",
+    "narration": "English and Hindi board controls, Hindi sample instructions, and device read-aloud help families use the same plan. Full translation of a family's own notices is available through optional AI processing."
+  },
+  {
+    "image": "08-family.jpg",
+    "label": "08 / PASS THE PLAN ON",
+    "title": "ONE SHEET\nFOR THE\nFAMILY GROUP.",
+    "body": "Revised dates and instructions.\nCompleted steps. Source quotes.\n\nCopy the checklist, save the\ntext, or print it for home.",
+    "note": "Keep the version with the instructions.",
+    "narration": "The family checklist puts the revised instructions, dates, completion state, and original quotes into one sheet. Copy it to a family group, save the text, or print it for home."
+  },
+  {
+    "image": "09-calendar.jpg",
+    "label": "09 / THE DATE SHEET",
+    "title": "WHAT'S DUE.\nAND WHEN.",
+    "body": "See the remaining deadlines\ntogether in one place.\n\nBlue: a confirmed date.\nYellow: still needs review.",
+    "note": "October 2026 / the updated plan",
+    "narration": "The date sheet brings the remaining deadlines together. Blue marks confirmed dates. The yellow mark here is a date that still needs review."
+  },
+  {
+    "image": "10-export.jpg",
+    "label": "10 / TAKE THE DATE WITH YOU",
+    "title": "ONLY THE\nREMINDERS\nYOU CHECKED.",
+    "body": "Export confirmed, unfinished\nsteps as an .ics calendar file.\n\nOne all-day consent reminder\nis ready in this example.",
+    "note": "Import the file into your calendar app.",
+    "narration": "Only unfinished steps with confirmed dates are exported. In this example, the calendar file contains one all-day reminder for the new consent deadline. It can be imported into a calendar app."
+  },
+  {
+    "image": "11-backup.jpg",
+    "label": "11 / KEEP YOUR BOARD",
+    "title": "PICK UP\nWHERE YOU\nLEFT OFF.",
+    "body": "Circulars. Progress. Checked dates.\nYour name, school, and class.\n\nDownload a board backup.\nPreview it before restoring.",
+    "note": "Saved on this device. Portable as a file.",
+    "narration": "The board is saved on this device. Download a backup to move circulars, progress, and checked dates to another device. Restoring shows a preview before replacing the current board."
+  },
+  {
+    "image": "12-close.jpg",
+    "label": "12 / NOTICEBRIDGE",
+    "title": "TRACE IT.\nCATCH THE UPDATE.\nSHARE THE PLAN.",
+    "body": "A school circular becomes\na clear next step at home.\n\nWorking prototype.\nPublic source and setup.",
+    "note": "github.com/ashank-crazy/noticebridge",
+    "narration": "NoticeBridge connects a school circular to the next step at home. Trace the instruction. Catch the revision. Share the plan. The source code and setup are available on GitHub."
+  }
+]

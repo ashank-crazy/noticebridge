@@ -1,0 +1,108 @@
+1
+00:00:00,250 --> 00:00:07,895
+School circulars arrive as PDFs, photos, and class-group messages. The small details are
+easy to lose. NoticeBridge
+
+2
+00:00:07,895 --> 00:00:11,942
+gives a family one noticeboard for what needs doing.
+
+3
+00:00:12,742 --> 00:00:20,630
+Pin a notice from a PDF, English screenshot, or pasted text. File reading happens in the
+browser. This walkthrough
+
+4
+00:00:20,630 --> 00:00:24,782
+uses the built-in museum trip sample and local English extraction.
+
+5
+00:00:25,582 --> 00:00:32,575
+The circular becomes a checklist: submit the consent form, pay the fee, and pack for the
+trip. Every extracted
+
+6
+00:00:32,575 --> 00:00:35,520
+step keeps an exact quote from the source.
+
+7
+00:00:36,320 --> 00:00:41,975
+Before creating a reminder, check the date against the highlighted sentence. Confirm it
+yourself. Missing
+
+8
+00:00:41,975 --> 00:00:46,876
+years and unclear dates stay out of the export until they are reviewed.
+
+9
+00:00:47,676 --> 00:00:53,837
+Now the school sends a revision. The consent deadline moves from the twenty-fourth to the
+twenty-seventh of
+
+10
+00:00:53,837 --> 00:00:58,186
+October. NoticeBridge crosses out the old date and asks for confirmation again.
+
+11
+00:00:58,986 --> 00:01:06,327
+The packing list also adds a school ID card. Both changes are marked, while the unchanged
+payment stays completed.
+
+12
+00:01:06,327 --> 00:01:09,804
+The current circular remains beside the checklist for checking.
+
+13
+00:01:10,604 --> 00:01:17,473
+English and Hindi board controls, Hindi sample instructions, and device read-aloud help
+families use the same
+
+14
+00:01:17,473 --> 00:01:23,483
+plan. Full translation of a family's own notices is available through optional AI
+processing.
+
+15
+00:01:24,283 --> 00:01:30,313
+The family checklist puts the revised instructions, dates, completion state, and original
+quotes into one
+
+16
+00:01:30,313 --> 00:01:36,343
+sheet. Copy it to a family group, save the text, or print it for home.
+
+17
+00:01:37,143 --> 00:01:43,011
+The date sheet brings the remaining deadlines together. Blue marks confirmed dates. The
+yellow mark here is
+
+18
+00:01:43,011 --> 00:01:45,082
+a date that still needs review.
+
+19
+00:01:45,882 --> 00:01:52,199
+Only unfinished steps with confirmed dates are exported. In this example, the calendar file
+contains one all-day
+
+20
+00:01:52,199 --> 00:01:57,402
+reminder for the new consent deadline. It can be imported into a calendar app.
+
+21
+00:01:58,202 --> 00:02:05,535
+The board is saved on this device. Download a backup to move circulars, progress, and
+checked dates to another
+
+22
+00:02:05,535 --> 00:02:09,394
+device. Restoring shows a preview before replacing the current board.
+
+23
+00:02:10,194 --> 00:02:16,648
+NoticeBridge connects a school circular to the next step at home. Trace the instruction.
+Catch the revision.
+
+24
+00:02:16,648 --> 00:02:21,203
+Share the plan. The source code and setup are available on GitHub.
