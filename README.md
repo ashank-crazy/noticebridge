@@ -12,7 +12,9 @@ School circulars get buried in message threads. NoticeBridge puts the instructio
 - Turns instructions into a checklist, with the exact source text attached to each step.
 - Compares revised circulars and marks changed deadlines, added instructions, and removals.
 - Exports confirmed dates to a calendar file.
-- Supports Hindi translations and read-aloud, with an editable name, school, and class for your board.
+- Copies, saves, or prints a family checklist with original source quotes and revision details.
+- Backs up and restores the board, including completed steps and checked dates.
+- Offers English/Hindi board controls, Hindi sample instructions, and read-aloud, with an editable name, school, and class for your board.
 
 ## Run
 
@@ -52,7 +54,7 @@ Extraction, date parsing, revision matching, calendar exports, and the AI endpoi
 
 ## Notes
 
-The local extractor handles common English instructions. Full translation of imported notices needs the AI option. OCR text is editable before analysis. Ambiguous dates need confirmation, and exported reminders are all-day events. Calendar files are imported manually; they do not sync automatically.
+The local extractor handles common English instructions. Full translation of imported notices needs the AI option. OCR text is editable before analysis. Ambiguous dates need confirmation, and exported reminders are all-day events. Calendar files are imported manually; they do not sync automatically. Board backups contain the full notice text. Restoring a backup replaces the current board after a preview.
 
 ## Stack
 

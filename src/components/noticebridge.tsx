@@ -10,6 +10,8 @@ import {
   Check,
   CircleHelp,
   ClipboardList,
+  Copy,
+  Download,
   FileText,
   GitCompareArrows,
   Headphones,
@@ -30,6 +32,8 @@ import CalendarView from "./calendar-view";
 import ActionCard from "./action-card";
 import ProfileDialog from "./profile-dialog";
 import Modal from "./modal";
+import FamilyBrief from "./family-brief";
+import BoardBackup from "./board-backup";
 import { analyzeLocal, compareRevision, formatDate } from "@/lib/engine";
 import { createCalendar } from "@/lib/calendar";
 import { sampleDocument } from "@/lib/sample";
@@ -67,6 +71,8 @@ export default function NoticeBridge() {
   const [importMode, setImportMode] = useState<"new" | "revision" | null>(null);
   const [help, setHelp] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [briefOpen, setBriefOpen] = useState(false);
+  const [backupOpen, setBackupOpen] = useState(false);
   const [noticeQuery, setNoticeQuery] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [aiAvailable, setAiAvailable] = useState(false);
@@ -401,7 +407,12 @@ export default function NoticeBridge() {
           </button>
         </nav>
         <div className="topbar-right">
-          <div className="language-toggle" role="group" aria-label="Interface language">
+          <div
+            className="language-toggle"
+            role="group"
+            aria-label="Board language"
+            title="Board language. Full translation of imported notices needs optional AI processing."
+          >
             <Languages size={17} />
             <button
               className={!hi ? "selected" : ""}
@@ -499,6 +510,16 @@ export default function NoticeBridge() {
             </button>
           </div>
           <div className="sidebar-bottom">
+            <button
+              className="board-settings"
+              onClick={() => {
+                setBackupOpen(true);
+                setSidebarOpen(false);
+              }}
+            >
+              <Download size={16} />
+              <span>{hi ? "बोर्ड सहेजें / वापस लाएँ" : "Save / restore board"}</span>
+            </button>
             <button
               className="board-settings"
               onClick={() => {
@@ -651,10 +672,16 @@ export default function NoticeBridge() {
                   <Paperclip size={15} />
                   <h2>{hi ? "आपके बोर्ड पर खुली सूचना" : "OPEN ON YOUR BOARD"}</h2>
                 </div>
-                <button className="button secondary" onClick={exportCalendar}>
-                  <ArrowDownToLine size={16} />
-                  {hi ? "कैलेंडर डाउनलोड करें" : "Save dates to calendar"}
-                </button>
+                <div className="sheet-heading-tools">
+                  <button className="button secondary" onClick={() => setBriefOpen(true)}>
+                    <Copy size={16} />
+                    {hi ? "परिवार की चेकलिस्ट" : "Family checklist"}
+                  </button>
+                  <button className="button secondary" onClick={exportCalendar}>
+                    <ArrowDownToLine size={16} />
+                    {hi ? "कैलेंडर डाउनलोड करें" : "Save dates to calendar"}
+                  </button>
+                </div>
               </div>
               {notice.revision && (
                 <div className="revision-banner">
@@ -922,6 +949,30 @@ export default function NoticeBridge() {
             setWorkspace((w) => ({ ...w, profile }));
             setProfileOpen(false);
             setToast("Board details saved on this device.");
+          }}
+        />
+      )}
+      {briefOpen && (
+        <FamilyBrief
+          notice={notice}
+          language={workspace.language}
+          onClose={() => setBriefOpen(false)}
+        />
+      )}
+      {backupOpen && (
+        <BoardBackup
+          workspace={workspace}
+          onClose={() => setBackupOpen(false)}
+          onRestore={(restored) => {
+            setWorkspace(restored);
+            setBackupOpen(false);
+            setNoticeQuery("");
+            setView("notices");
+            setFilter("todo");
+            setSelectedActionId(null);
+            setEditingDate(null);
+            setSourcePrevious(false);
+            setToast("Board restored. Your circulars and checked steps are ready.");
           }}
         />
       )}

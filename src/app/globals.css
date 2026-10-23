@@ -3059,3 +3059,139 @@ input[type="checkbox"] {
     white-space: nowrap;
   }
 }
+
+.sheet-heading-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.family-brief-paper {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  padding: 25px;
+  max-height: 52vh;
+  overflow: auto;
+  box-shadow: 3px 4px 0 #1d3e5909;
+}
+.brief-masthead {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  padding-bottom: 13px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--ink);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.family-brief-paper pre {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.brief-tools {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.backup-options {
+  display: grid;
+  gap: 15px;
+}
+.backup-options > .button {
+  justify-self: start;
+}
+.backup-options hr {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 8px 0;
+}
+.backup-options .field {
+  margin: 0;
+}
+.backup-options input[type="file"] {
+  font-size: 12px;
+  padding: 12px;
+  max-width: 100%;
+}
+.backup-preview {
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  display: grid;
+  gap: 12px;
+}
+.backup-preview .button {
+  justify-self: start;
+}
+.backup-preview p {
+  font-size: 13px;
+  color: var(--muted);
+}
+@media (max-width: 780px) {
+  .workspace-section-heading {
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .sheet-heading-tools {
+    width: 100%;
+  }
+  .sheet-heading-tools .button {
+    flex: 1;
+    font-size: 11px;
+    padding: 10px;
+  }
+  .family-brief-paper {
+    padding: 17px;
+  }
+  .brief-masthead {
+    font-size: 8px;
+    letter-spacing: 0.5px;
+  }
+}
+@media print {
+  @page {
+    margin: 18mm;
+  }
+  body:has(.family-brief-paper) {
+    background: white;
+    font-size: 11pt;
+  }
+  body:has(.family-brief-paper) .app-shell > :not(dialog[open]) {
+    display: none !important;
+  }
+  body:has(.family-brief-paper) dialog[open] {
+    position: static;
+    width: 100%;
+    max-width: none;
+    max-height: none;
+    overflow: visible;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+    background: white;
+  }
+  body:has(.family-brief-paper) .modal-content {
+    padding: 0;
+  }
+  body:has(.family-brief-paper) .modal-content > :not(.family-brief-paper) {
+    display: none !important;
+  }
+  .family-brief-paper {
+    max-height: none;
+    overflow: visible;
+    border: 0;
+    padding: 0;
+    box-shadow: none;
+    background: white;
+  }
+  .family-brief-paper pre {
+    font-size: 10pt;
+    line-height: 1.65;
+  }
+}
